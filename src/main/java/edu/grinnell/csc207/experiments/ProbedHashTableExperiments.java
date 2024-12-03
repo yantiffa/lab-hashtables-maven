@@ -41,6 +41,19 @@ public class ProbedHashTableExperiments {
     // Most of the time, we don't care about the basic calls
     htab.reportBasicCalls(false);
 
+    htab.reportBasicCalls(true);
+    htab.set("alpha", "alpha");
+    htab.dump(pen);
+    htab.set("beta", "beta");
+    htab.dump(pen);
+    htab.set("bravo", "bravo");
+    htab.dump(pen);
+    htab.set("beta", "max");
+    htab.dump(pen);
+    htab.reportBasicCalls(false);
+    checkGet(pen, htab, "bravo");
+    pen.println();
+
     // Conduct some of the experiments
     // HashTableExperiments.matchingKeysExpt(pen, htab);
     // HashTableExperiments.repeatedSetExpt(pen, htab);
