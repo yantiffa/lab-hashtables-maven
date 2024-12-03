@@ -8,8 +8,7 @@ import java.util.function.BiConsumer;
 /**
  * A simple implementation of probed hash tables.
  *
- * @author Your Name Here
- * @author Your Name Here
+ * @author Tiffany Yan
  * @author Samuel A. Rebelsky
  *
  * @param <K>
@@ -186,7 +185,7 @@ public class ProbedHashTable<K, V> implements HashTable<K, V> {
     int index = find(key);
     @SuppressWarnings("unchecked")
     Pair<K, V> pair = (Pair<K, V>) pairs[index];
-    if (pair == null) {
+    if (pair == null || !pair.key().equals(key)) {
       if (REPORT_BASIC_CALLS && (reporter != null)) {
         reporter.report("get(" + key + ") failed");
       } // if reporter != null
@@ -241,16 +240,23 @@ public class ProbedHashTable<K, V> implements HashTable<K, V> {
     if (this.size > (this.pairs.length * LOAD_FACTOR)) {
       expand();
     } // if there are too many entries
+    
     // Find out where the key belongs and put the pair there.
     int index = find(key);
     if (this.pairs[index] != null) {
-      result = ((Pair<K, V>) this.pairs[index]).value();
+      Pair<K, V> curr = (Pair<K, V>)this.pairs[index];
+      if (curr.key().equals(key)) {
+        result = curr.value();
+        this.pairs[index] = new Pair<K, V>(key, value);
+        if (REPORT_BASIC_CALLS && (reporter != null)) {
+          reporter.report("pairs[" + index + "] = " + key + ":" + value);
+        } // if reporter != null
+        return result;
+      }
     } // if
     this.pairs[index] = new Pair<K, V>(key, value);
     // Report activity, if appropriate
-    if (REPORT_BASIC_CALLS && (reporter != null)) {
-      reporter.report("pairs[" + index + "] = " + key + ":" + value);
-    } // if reporter != null
+    
     // Note that we've incremented the size.
     ++this.size;
     // And we're done
@@ -382,7 +388,16 @@ public class ProbedHashTable<K, V> implements HashTable<K, V> {
    * @return the aforementioned index.
    */
   int find(K key) {
-    return Math.abs(key.hashCode()) % this.pairs.length;
+    int inde = Math.abs(key.hashCode()) % this.pairs.length;
+    int first = inde;
+
+    do{
+      Pair<K,V> pair = (Pair<K,V>) pairs[index];
+      if (pair.key().equals(key)) {
+          return index;
+      } //if
+      index = (index + PROBE_OFFSET) % this.pairs.length;
+    } while (inde != first);
   } // find(K)
 
 } // class ProbedHashTable<K, V>
